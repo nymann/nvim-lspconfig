@@ -1,7 +1,7 @@
 local util = require 'lspconfig.util'
 
 local bin_name = 'refacto'
-local cmd = { bin_name, '--port=8000' }
+local cmd = { bin_name, '--port=11200' }
 
 if vim.fn.has 'win32' == 1 then
   cmd = { 'cmd.exe', '/C', bin_name, '--stdio' }
