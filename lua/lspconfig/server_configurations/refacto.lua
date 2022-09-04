@@ -1,10 +1,10 @@
 local util = require 'lspconfig.util'
 
 local bin_name = 'refacto'
-local cmd = { bin_name, '--port=11200' }
+local cmd = { bin_name, 'stdio' }
 
 if vim.fn.has 'win32' == 1 then
-  cmd = { 'cmd.exe', '/C', bin_name, '--stdio' }
+  cmd = { 'cmd.exe', '/C', bin_name, 'stdio' }
 end
 
 local root_files = {
@@ -27,7 +27,7 @@ return {
   commands = {},
   docs = {
     description = [[
-https://github.com/nymann/refactor
+https://github.com/nymann/refacto
 
 `refacto`, a refactoring tool for python
 ]],
