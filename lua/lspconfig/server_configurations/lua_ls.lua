@@ -10,16 +10,9 @@ local root_files = {
   'selene.yml',
 }
 
-local bin_name = 'lua-language-server'
-local cmd = { bin_name }
-
-if vim.fn.has 'win32' == 1 then
-  cmd = { 'cmd.exe', '/C', bin_name }
-end
-
 return {
   default_config = {
-    cmd = cmd,
+    cmd = { 'lua-language-server' },
     filetypes = { 'lua' },
     root_dir = function(fname)
       local root = util.root_pattern(unpack(root_files))(fname)
@@ -38,11 +31,11 @@ return {
   },
   docs = {
     description = [[
-https://github.com/sumneko/lua-language-server
+https://github.com/luals/lua-language-server
 
 Lua language server.
 
-`lua-language-server` can be installed by following the instructions [here](https://github.com/sumneko/lua-language-server/wiki/Getting-Started#command-line).
+`lua-language-server` can be installed by following the instructions [here](https://github.com/luals/lua-language-server/wiki/Getting-Started#command-line).
 
 The default `cmd` assumes that the `lua-language-server` binary can be found in `$PATH`.
 
@@ -55,33 +48,33 @@ initial requests (completion, location) upon starting as well as time to first d
 Completion results will include a workspace indexing progress message until the server has finished indexing.
 
 ```lua
-require'lspconfig'.sumneko_lua.setup {
-  settings = {
-    Lua = {
-      runtime = {
-        -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-        version = 'LuaJIT',
-      },
-      diagnostics = {
-        -- Get the language server to recognize the `vim` global
-        globals = {'vim'},
-      },
-      workspace = {
+require'lspconfig'.lua_ls.setup {
+  on_init = function(client)
+    local path = client.workspace_folders[1].name
+    if not vim.loop.fs_stat(path..'/.luarc.json') and not vim.loop.fs_stat(path..'/.luarc.jsonc') then
+      client.config.settings = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+        runtime = {
+          -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
+          version = 'LuaJIT'
+        },
         -- Make the server aware of Neovim runtime files
-        library = vim.api.nvim_get_runtime_file("", true),
-      },
-      -- Do not send telemetry data containing a randomized but unique identifier
-      telemetry = {
-        enable = false,
-      },
-    },
-  },
+        workspace = {
+          library = { vim.env.VIMRUNTIME }
+          -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+          -- library = vim.api.nvim_get_runtime_file("", true)
+        }
+      })
+
+      client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+    end
+    return true
+  end
 }
 ```
 
-See `lua-language-server`'s [documentation](https://github.com/sumneko/lua-language-server/blob/master/locale/en-us/setting.lua) for an explanation of the above fields:
-* [Lua.runtime.path](https://github.com/sumneko/lua-language-server/blob/076dd3e5c4e03f9cef0c5757dfa09a010c0ec6bf/locale/en-us/setting.lua#L5-L13)
-* [Lua.workspace.library](https://github.com/sumneko/lua-language-server/blob/076dd3e5c4e03f9cef0c5757dfa09a010c0ec6bf/locale/en-us/setting.lua#L77-L78)
+See `lua-language-server`'s [documentation](https://github.com/luals/lua-language-server/blob/master/locale/en-us/setting.lua) for an explanation of the above fields:
+* [Lua.runtime.path](https://github.com/luals/lua-language-server/blob/076dd3e5c4e03f9cef0c5757dfa09a010c0ec6bf/locale/en-us/setting.lua#L5-L13)
+* [Lua.workspace.library](https://github.com/luals/lua-language-server/blob/076dd3e5c4e03f9cef0c5757dfa09a010c0ec6bf/locale/en-us/setting.lua#L77-L78)
 
 ]],
     default_config = {
